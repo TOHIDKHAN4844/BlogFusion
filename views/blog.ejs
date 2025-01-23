@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("partials/head.ejs")  %>
+    <title>Blog Page</title>
+    <style>
+        body {
+        background-image: url(/images/bg2.jpg);
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7f9fc;
+        }
+
+        /* .container {
+            margin-top: 30px;
+            
+        } */
+
+        .container {
+    margin: 30px auto; /* Centers the container horizontally and adds a margin on top */
+    max-width: 800px; /* Sets the maximum width of the container */
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+        h1 {
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        img {
+            border-radius: 8px;
+            display: flex;
+             justify-content: center;
+            
+        }
+
+       .igg img {
+    border-radius: 8px;
+    display: block; /* Makes the image behave like a block element for centering */
+    margin: 0 auto; /* Centers the image horizontally */
+}
+
+
+pre {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    background-color: #ffffff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    white-space: pre-wrap; /* Ensures text wraps onto the next line */
+    word-wrap: break-word; /* Breaks long words if necessary */
+}
+
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .comment {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between; /* Ensures content is spaced between */
+    align-items: center; /* Aligns items vertically */
+}
+
+.comment img {
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.comment .delete-btn {
+    background-color: #e74c3c; /* Red delete button */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.comment .delete-btn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+
+
+        footer {
+            margin-top: 50px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <%- include("partials/nav.ejs")  %>
+
+    <div class="container igg">
+        <h1><%= blog.title %></h1>
+        <img src="<%= blog.coverImageURL %>" width="35%"  alt="Blog Cover" />
+        <pre class="mt-3"><%= blog.body %></pre>
+    </div>
+
+    <div class="container mt-4 ">
+        <div class="d-flex align-items-center">
+            <img src="/images/user.png"width="50px" height="50px"  alt="Author" />
+            <span class="ms-2"><strong><%= blog.createdBy.fullName %></strong></span>
+        </div>        
+    </div>
+
+    <div class="container mt-3">
+        <h1>Comments (<%= comments.length %>)</h1>
+        <% if (locals.user) { %>
+        <form action="/blog/comment/<%= blog._id %>" method="post">
+            <div class="mb-3 d-flex">
+                <input type="text" 
+                name="content"
+                class="form-control me-2"
+                placeholder="Enter Your Comment" />
+                <button class="btn btn-primary" type="submit">Add</button>
+            </div>
+        </form>
+        <% } %>
+
+        <div class="mt-3">
+            <% comments.forEach(comment => { %>
+            <div class="comment">
+                <div class="d-flex align-items-center">
+                    <img src="/images/default.png" width="50px" height="50px" alt="User">
+                    <div class="ms-3">
+                        <strong><%= comment.createdBy.fullName %></strong>
+                        <pre class="mb-0"><%= comment.content %></pre>
+                    </div>
+
+                </div>
+                <a href="">
+                    <button class="delete-btn" data-id="<%= comment._id %>">Delete</button>
+                </a>
+                
+            </div>
+            <% }) %>
+        </div>
+        
+    </div>
+
+    <footer>
+        <p>&copy; 2025 BlogFusion | All rights reserved.</p>
+    </footer>
+
+    <%- include("partials/scripts.ejs")  %>
+</body>
+</html>
