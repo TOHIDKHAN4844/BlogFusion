@@ -13,6 +13,8 @@ const blogRoute= require("./routes/blog");
 
 const {checkForAuthenticationCookie}= require("./middlewares/authentication");
 
+const attachUser = require("./middlewares/attachUser");
+
 const app = express();
 const PORT = process.env.PORT || 8000; 
 
@@ -27,13 +29,19 @@ app.set("views", path.resolve("./views"));
 
 app.use(express.urlencoded({extended: false})); 
 app.use(cookiePaser());
+
+// Attach user to res.locals
+app.use(attachUser);
+// Other routes
+app.use("/user", require("./routes/user"));
+
 app.use(checkForAuthenticationCookie("token"));
 app.use(express.static(path.resolve('./public')));
 
 app.get("/", async(req, res) =>{
   const allBlogs = await Blog.find({}) ;
 res.render("home", {
-  user: req.user,
+  user: res.locals.user,
   blogs: allBlogs,
 });
 });
