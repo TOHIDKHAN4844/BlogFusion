@@ -4,25 +4,36 @@ const path = require("path");
 const Blog = require("../models/blog");
 const Comment = require("../models/comment");
 
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
 const router = Router();
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, path.resolve(`./public/uploads/`));
-    },
-    filename: function (req, file, cb) {
-      const fileName = `${Date.now()}-${file.originalname}`;
-      cb(null, fileName);
-    },
-  });
-
-router.get("/add-new", (req, res) => {
-    return res.render("addBlog", {
-        user: req.user,
-    });
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, // Add to your .env file
+  api_key: process.env.CLOUDINARY_API_KEY,       // Add to your .env file
+  api_secret: process.env.CLOUDINARY_API_SECRET, // Add to your .env file
 });
 
+// Configure Multer with Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "blogfusion", // Name of the folder in Cloudinary
+    allowed_formats: ["jpg", "png", "jpeg"], // Allowed file formats
+  },
+});
+
+
+
 const upload = multer({storage: storage});
+
+router.get("/add-new", (req, res) => {
+  return res.render("addBlog", {
+      user: req.user,
+  });
+});
 
 router.get("/:id", async(req, res)=> {
 const blog = await Blog.findById(req.params.id).populate("createdBy");
@@ -48,18 +59,22 @@ return res.redirect(`/blog/${req.params.blogId}`);
 });
 
 router.post("/", upload.single('coverImage'), async(req, res) => {
-    const {title, body} = req.body;
+  try {
+    const { title, body } = req.body;
 
+    // Create the blog entry with the Cloudinary URL
     const blog = await Blog.create({
-        body,
-        title,
-        createdBy: req.user._id,
-         coverImageURL:`/uploads/${req.file.filename}`
-    })
-    
- //   console.log(req.body);
- //   console.log(req.file);
+      body,
+      title,
+      createdBy: req.user._id,
+      coverImageURL: req.file.path, // Cloudinary URL
+    });
+
     return res.redirect(`/blog/${blog._id}`);
+  } catch (err) {
+    console.error("Error creating blog:", err);
+    return res.status(500).send("Something went wrong while creating the blog.");
+  }
 });
 
 router.delete("/comment/:id", async (req, res) => {
